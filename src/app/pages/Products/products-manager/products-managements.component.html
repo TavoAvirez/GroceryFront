@@ -1,0 +1,28 @@
+Add Products
+
+<form (submit)="save()" [formGroup]="productForm">
+  <div class="form-group">
+    <label for="name" class="form-label">Name</label>
+    <input type="text" class="form-control" id="name" formControlName="name" placeholder="Platano" />
+     <div *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched" class="text-danger">
+      Name is required
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="price" class="form-label">Price</label>
+    <input type="number" class="form-control" id="price" placeholder="1000" formControlName="price" />
+    <div *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched" class="text-danger">
+      Price is required
+    </div>
+  </div>
+  <div  class="form-group">
+    <label for="image" class="form-label">Image</label>
+    <input type="file" id="image" (change)="onFileChange($event)" />
+    <div *ngIf="productForm.get('image')?.invalid && productForm.get('image')?.touched" class="text-danger">
+      Image is required
+    </div>
+  </div>
+
+  <button *ngIf="!isEditing" type="submit" class="btn btn-primary">Create</button>
+  <button *ngIf="isEditing" type="submit" class="btn btn-warning">Save Changes</button>
+</form>

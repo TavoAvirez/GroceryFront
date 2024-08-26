@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="row">
+    <div class="col-3 pb-2" *ngFor="let product of products">
+      <div class="card" style="width: 18rem">
+        <img
+          class="card-img-top"
+          [ngClass]="{'pointer': product.isEditing}"
+          width="280px"
+          height="236px"
+          [src]="product.imageURL"
+          [alt]="product.name"
+          (click)="product.isEditing ? onImageClick(): null"
+        />
+
+        <!-- Input file escondido -->
+        <input
+          type="file"
+          #fileInput
+          style="display: none;"
+          (change)="onFileSelected($event, product)"
+        />
+        <div class="card-body">
+          <h5 class="card-title">
+            <span *ngIf="!product.isEditing">{{product.name}}</span>
+            <span *ngIf="product.isEditing">
+              <input class="form-control" [(ngModel)]="product.name" type="text">
+            </span>
+          </h5>
+          <p class="card-text">
+            
+            <span *ngIf="!product.isEditing">${{product.price}}</span>
+            <span *ngIf="product.isEditing">
+              <input class="form-control" [(ngModel)]="product.price" type="number">
+            </span>
+          </p>
+          <div class="" >
+            <!-- <a (click)="navigateToProductManagement(product.id)" class="btn btn-primary btn-lg col-6">Edit</a> -->
+            <a *ngIf="!product.isEditing" (click)="edit(product)" class="btn btn-primary btn-lg col-6">Edit</a>
+            <a *ngIf="!product.isEditing" (click)="deleteProduct(product.id)" class="btn btn-danger btn-lg col-6">Delete</a>
+            <a *ngIf="product.isEditing" (click)="saveChanges(product)" class="btn btn-warning btn-lg col-6">Update</a>
+            <a *ngIf="product.isEditing" (click)="cancel(product)" class="btn btn-secondary btn-lg col-6">Cancel</a>
+          </div>          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
