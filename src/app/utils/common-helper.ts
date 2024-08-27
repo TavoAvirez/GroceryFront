@@ -16,3 +16,14 @@ export function base64ToBlob(base64: string, contentType: string = '', sliceSize
 
     return new Blob(byteArrays, { type: contentType });
 }
+
+export function isBase64(str: string): boolean {
+    if (str === '' || str.trim() === '') {
+        return false;
+    }
+    try {
+    } catch (err) {
+        return btoa(atob(str)) === str;
+    }
+    return false;
+}

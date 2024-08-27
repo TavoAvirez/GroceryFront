@@ -4,6 +4,8 @@ import { ProductsService } from '../../../services/products.service';
 import { COMMON_IMPORTS } from '../../../app.config';
 import { Product } from '../../../models/Product';
 import { ActivatedRoute, Router } from '@angular/router';
+import * as common from '../../../utils/common-helper';
+
 
 @Component({
   selector: 'app-products-manager',
@@ -17,6 +19,17 @@ export class ProductsManagementsComponent implements OnInit {
 
   productForm!: FormGroup;
   isEditing = false;
+  /**
+   * Constructor del componente de gestión de productos.
+   * Inicializa el formulario del producto con validaciones requeridas para los campos.
+   * Suscribe a los parámetros de la ruta para verificar si hay un ID de producto presente.
+   * Si hay un ID de producto, establece el modo de edición y carga los datos del producto.
+   *
+   * @param formBuilder - Servicio para construir formularios reactivos.
+   * @param productService - Servicio para interactuar con la API de productos.
+   * @param route - Servicio para acceder a los parámetros de la ruta activa.
+   * @param router - Servicio para la navegación del router.
+ */
   constructor(
     private formBuilder: FormBuilder,
     private productService: ProductsService,
@@ -43,6 +56,13 @@ export class ProductsManagementsComponent implements OnInit {
 
   }
 
+
+  /**
+   * Maneja el evento de cambio de archivo, leyendo el archivo seleccionado y actualizando el formulario del producto
+   * con la cadena base64 de la imagen si es válida.
+   * 
+   * @param event - El evento de cambio de archivo que contiene el archivo seleccionado.
+   */
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
       const file = event.target.files[0];
@@ -50,7 +70,7 @@ export class ProductsManagementsComponent implements OnInit {
       reader.readAsDataURL(file);
       reader.onload = () => {
         const base64String = reader.result?.toString().split(',')[1]; // Guardar solo la parte base64
-        if (base64String && this.isBase64(base64String)) {
+        if (base64String) {
           this.productForm.patchValue({
             image: base64String
           });
@@ -60,78 +80,44 @@ export class ProductsManagementsComponent implements OnInit {
       };
     }
   }
-  
-  private base64ToBlob(base64: string, contentType: string = '', sliceSize: number = 512): Blob {
-    const byteCharacters = atob(base64);
-    const byteArrays = [];
 
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      const byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
-
-    return new Blob(byteArrays, { type: contentType });
-  }
-
-  private isBase64(str: string): boolean {
-    if (str === '' || str.trim() === '') {
-      return false;
-    }
-    try {
-      return btoa(atob(str)) === str;
-    } catch (err) {
-      return false;
-    }
-  }
-
-
+  /**
+   * Guarda un nuevo producto.
+   * Verifica si el formulario del producto es válido. Si no lo es, muestra una alerta al usuario.
+   * Crea un objeto FormData con los datos del producto, incluyendo un ID aleatorio.
+   * Luego, llama al servicio de productos para crear el producto en el servidor.
+   * Si la creación es exitosa, muestra una alerta al usuario y reinicia el formulario.
+  */
   save() {
     if (this.productForm.invalid) {
       alert('Please fill all the fields!');
       return;
     }
-    
+
     const formData = new FormData();
-    const formValue = this.productForm.value;
     const randomId = Math.floor(Math.random() * 1000000);
 
-    formData.append('id', this.productForm.get('id')?.value || randomId.toString());
+    formData.append('id', randomId.toString());
     formData.append('name', this.productForm.get('name')?.value);
     formData.append('price', this.productForm.get('price')?.value);
     formData.append('image', (this.productForm.get('image')?.value));
 
-
-    const base64Image = formValue.image;
-    if (base64Image) {
-      const imageBlob = this.base64ToBlob(base64Image, 'image/jpeg'); // Cambia 'image/jpeg' al tipo MIME correcto si es necesario
-      formData.set('image', imageBlob, 'image.jpg'); // Cambia 'image.jpg' al nombre de archivo correcto si es necesario
-    }
-    if (this.isEditing) {
-      this.productService.updateProduct(this.productForm.get('id')?.value, formData).subscribe((response) => {
-        if (response) {
-          alert('Product updated successfully!');
-          this.productForm.reset();
-          this.router.navigate(['/products-inventory']);
-        }
-      });
-      
-    } else {
-      this.productService.createProduct(formData).subscribe((response) => {
-        if (response) {
-          alert('Product saved successfully!');
-          this.productForm.reset();
-        }
-      });
-    }
+    this.productService.createProduct(formData).subscribe((response) => {
+      if (response) {
+        alert('Product saved successfully!');
+        this.productForm.reset();
+      }
+    });
   }
 
+  /**
+   * Carga un producto por su ID.
+   * Llama al servicio de productos para obtener los datos del producto especificado por el ID.
+   * Si la solicitud es exitosa, actualiza el formulario del producto con los datos recibidos.
+   * Si ocurre un error durante la carga del producto, lo registra en la consola.
+   *
+   * @param id - El ID del producto a cargar.
+ */
   loadProduct(id: number) {
     this.productService.getProduct(id).subscribe(
       (product: Product) => {
@@ -146,5 +132,5 @@ export class ProductsManagementsComponent implements OnInit {
         console.error('Error loading product', error);
       }
     );
-  }  
+  }
 }

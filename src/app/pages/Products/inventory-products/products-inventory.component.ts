@@ -6,7 +6,7 @@ import { ProductsService } from '../../../services/products.service';
 import { COMMON_IMPORTS } from '../../../app.config';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import * as common  from '../../../utils/common-helper';
+import * as common from '../../../utils/common-helper';
 
 @Component({
   selector: 'app-inventory-products',
@@ -39,15 +39,18 @@ export class ProductsInventoryComponent implements OnInit {
 
   }
 
+  /**
+   * Método de ciclo de vida de Angular que se llama después de que Angular ha inicializado todas las propiedades de datos vinculados.
+   * Aquí se llama al método getProducts para cargar los productos.
+  */
   ngOnInit(): void {
     this.getProducts();
   }
 
-  navigateToProductManagement(id: number) {
-    this.router.navigate(['/products-management', id]);
-  }
-
-
+  /**
+   * Obtiene la lista de productos desde el servicio de productos y carga las imágenes de cada producto.
+   * Los productos se almacenan en la propiedad `products` del componente.
+  */
   getProducts(): void {
     this.productsService.getProducts()
       .pipe(
@@ -68,7 +71,11 @@ export class ProductsInventoryComponent implements OnInit {
       });
   }
 
-
+  /**
+   * Carga la imagen de un producto y la convierte en una URL segura.
+   * @param product - El producto cuya imagen se va a cargar.
+   * @returns Un Observable que se completa cuando la imagen se ha cargado.
+   */
   loadImage(product: Product): Observable<void> {
     return new Observable<void>(observer => {
       if (product.image) {
@@ -82,14 +89,18 @@ export class ProductsInventoryComponent implements OnInit {
     });
   }
 
+  /**
+   * Elimina un producto dado su ID después de confirmar la acción con el usuario.
+   * Si la eliminación es exitosa, muestra una alerta de éxito y actualiza la lista de productos.
+   * Si ocurre un error durante la eliminación, lo registra en la consola.
+   * @param id - El ID del producto que se desea eliminar.
+   */
   deleteProduct(id: number) {
     if (confirm('Are you sure you want to delete this product?')) {
       this.productService.deleteProduct(id).subscribe(
-        (response) => {
-          if (response) {
-            alert('Product deleted successfully!');
-            this.getProducts();
-          }
+        () => {
+          alert('Product deleted successfully!');
+          this.getProducts();
         },
         error => {
           console.error('Error deleting product', error);
@@ -98,11 +109,22 @@ export class ProductsInventoryComponent implements OnInit {
     }
   }
 
+  /*
+    * Activa el modo de edición para un producto y guarda una copia del estado
+    * Esto permite que el usuario edite el producto y, si es necesario, revertir los cambios.
+    * @param product - El producto que se va a editar.
+  */
   edit(product: Product) {
     product.isEditing = true;
     this.previousProduct = { ...product };
   }
 
+  /**
+   * Cancela la edición de un producto y restaura sus valores originales.
+   * Si hay un producto previo almacenado, encuentra el producto original en la lista de productos
+   * y restaura sus valores a los del producto previo. Luego, desactiva el modo de edición.
+   * @param product - El producto que se está editando y se desea cancelar la edición.
+   */
   cancel(product: Product) {
     if (this.previousProduct) {
       const originalProduct = this.products.find(p => p.id === product.id);
@@ -113,6 +135,14 @@ export class ProductsInventoryComponent implements OnInit {
     }
   }
 
+  /**
+   * Guarda los cambios realizados en un producto.
+   * Crea un objeto FormData con los datos del producto, incluyendo la conversión de la imagen base64 a un Blob.
+   * Luego, llama al servicio de productos para actualizar el producto en el servidor.
+   * Si la actualización es exitosa, desactiva el modo de edición del producto.
+   * Si ocurre un error, muestra una alerta al usuario.
+   * @param product - El producto con los cambios que se desean guardar.
+  */
   saveChanges(product: Product) {
     const formData = new FormData();
     const formValue = product;
@@ -123,20 +153,21 @@ export class ProductsInventoryComponent implements OnInit {
     formData.append('price', product.price.toString());
     formData.append('image', product.image);
 
-
-    const base64Image = formValue.image;
-    if (base64Image) {
+    let base64Image = formValue.image;
+    base64Image = base64Image.split(',');
+    if (base64Image && base64Image.length > 1) {
+      base64Image = base64Image[1];
       const imageBlob = common.base64ToBlob(base64Image, 'image/jpeg'); // Cambia 'image/jpeg' al tipo MIME correcto si es necesario
       formData.set('image', imageBlob, 'image.jpg'); // Cambia 'image.jpg' al nombre de archivo correcto si es necesario
     }
 
-    this.productService.updateProduct(product.id, formData).subscribe((response) => {
-      if (response) {
-        this.products.find(p => p.id === product.id)!.isEditing = false;
-      } else {
-        alert('An error has occurred!');
+    this.productService.updateProduct(product.id, formData).subscribe(
+      () => {
+        this.products.find(p => p.id === product.id)!.isEditing = false;        
+      }, error => {
+        console.error('Error updating product', error);
       }
-    });
+    );
   }
 
   // Método que dispara el click del input file
@@ -153,6 +184,7 @@ export class ProductsInventoryComponent implements OnInit {
 
       reader.onload = (e: any) => {
         product.imageURL = e.target.result;
+        product.image = e.target.result;
       };
 
       reader.readAsDataURL(file);
