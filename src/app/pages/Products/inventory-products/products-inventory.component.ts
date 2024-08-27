@@ -149,6 +149,7 @@ export class ProductsInventoryComponent implements OnInit {
     const randomId = Math.floor(Math.random() * 1000000);
 
     formData.append('id', product.id.toString() || randomId.toString());
+    formData.append('quantity', product.quantity.toString());
     formData.append('name', product.name);
     formData.append('price', product.price.toString());
     formData.append('image', product.image);

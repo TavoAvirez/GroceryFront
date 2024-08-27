@@ -1,28 +1,49 @@
-Add Products
+<div class="container">
+  <h1>Add Products</h1>
 
-<form (submit)="save()" [formGroup]="productForm">
-  <div class="form-group">
-    <label for="name" class="form-label">Name</label>
-    <input type="text" class="form-control" id="name" formControlName="name" placeholder="Platano" />
-     <div *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched" class="text-danger">
-      Name is required
+  <form (submit)="save()" [formGroup]="productForm">
+    <div class="form-group">
+      <label for="name" class="form-label">Name:</label>
+      <input type="text" class="form-control" id="name" formControlName="name" placeholder="Platano" />
+      <div *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched" class="text-danger">
+        Name is required
+      </div>
     </div>
-  </div>
-  <div class="form-group">
-    <label for="price" class="form-label">Price</label>
-    <input type="number" class="form-control" id="price" placeholder="1000" formControlName="price" />
-    <div *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched" class="text-danger">
-      Price is required
+    
+    <div class="form-group">
+      <label for="quantity" class="form-label">Quantity:</label>
+      <div class="input-group">                      
+        <input type="number" class="form-control" id="quantity" placeholder="1000" formControlName="quantity" />
+        <div *ngIf="productForm.get('quantity')?.invalid && productForm.get('quantity')?.touched" class="text-danger">
+          Quantity is required
+        </div>
+        <div class="input-group-append">
+          <span class="input-group-text">pz</span>
+        </div>
+      </div>       
     </div>
-  </div>
-  <div  class="form-group col-4">
-    <label for="image" class="form-label">Image</label>
-    <input type="file" id="image" class="form-control" (change)="onFileChange($event)" />
-    <div *ngIf="productForm.get('image')?.invalid && productForm.get('image')?.touched" class="text-danger">
-      Image is required
-    </div>
-  </div>
 
-  <button type="submit" class="btn btn-primary mt-2">Create</button>
-  
-</form>
+    <div class="form-group">
+      <label for="price" class="form-label">Price:</label>
+      <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">$</span>
+          </div>    
+          <input type="number" class="form-control" id="price" placeholder="1000" formControlName="price" />
+          <div *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched" class="text-danger">
+              Price is required
+          </div>
+        </div>          
+    </div>
+
+    <div  class="form-group col-4">
+      <label for="image" class="form-label">Image:</label>
+      <input type="file" id="image" class="form-control" (change)="onFileChange($event)" />
+      <div *ngIf="productForm.get('image')?.invalid && productForm.get('image')?.touched" class="text-danger">
+        Image is required
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Create</button>  
+  </form>
+</div>

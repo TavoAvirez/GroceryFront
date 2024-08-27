@@ -40,6 +40,7 @@ export class ProductsManagementsComponent implements OnInit {
       id: [''],
       name: ['', Validators.required],
       price: ['', Validators.required],
+      quantity: ['', Validators.required],
       image: ['', Validators.required],
     });
   }
@@ -93,6 +94,7 @@ export class ProductsManagementsComponent implements OnInit {
     formData.append('name', this.productForm.get('name')?.value);
     formData.append('price', this.productForm.get('price')?.value);
     formData.append('image', (this.productForm.get('image')?.value));
+    formData.append('quantity', (this.productForm.get('quantity')?.value));
 
     this.productService.createProduct(formData).subscribe((response) => {
       if (response) {
