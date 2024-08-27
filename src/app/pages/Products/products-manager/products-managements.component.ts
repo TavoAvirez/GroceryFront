@@ -18,7 +18,7 @@ import * as common from '../../../utils/common-helper';
 export class ProductsManagementsComponent implements OnInit {
 
   productForm!: FormGroup;
-  isEditing = false;
+
   /**
    * Constructor del componente de gestión de productos.
    * Inicializa el formulario del producto con validaciones requeridas para los campos.
@@ -41,14 +41,6 @@ export class ProductsManagementsComponent implements OnInit {
       name: ['', Validators.required],
       price: ['', Validators.required],
       image: ['', Validators.required],
-    });
-
-    this.route.params.subscribe(params => {
-      const productId = +params['id']; // El signo + convierte el string a número
-      if (productId) {
-        this.isEditing = true;
-        this.loadProduct(productId);
-      }
     });
   }
 
