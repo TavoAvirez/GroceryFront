@@ -1,5 +1,13 @@
 @import "../node_modules/bootstrap/scss/bootstrap";
 
+body {
+  width: 100%;
+}
+
 .pointer {
   cursor: pointer;
+}
+
+.disabled {
+  cursor: not-allowed;
 }

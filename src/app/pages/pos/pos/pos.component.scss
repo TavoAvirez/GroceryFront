@@ -1,0 +1,23 @@
+hr {
+  height: 10px;
+}
+
+.dashboard-container {
+//   background-color: green;
+  overflow: hidden;
+}
+
+.left-side {
+//   background-color: rgb(203, 203, 238);
+  padding-bottom: 1000px;
+  margin-bottom: -1000px;
+  height: 100%;
+}
+
+.right-side {
+  height: 100%;
+//   background-color: rgb(145, 139, 139);
+  padding-bottom: 1000px;
+  margin-bottom: -1000px;
+  height: 100%;
+}

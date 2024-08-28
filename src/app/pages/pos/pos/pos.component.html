@@ -1,0 +1,105 @@
+<div class="row dashboard-container">
+  <div class="col-8 left-side">
+    <div class="col-12">
+      <div class="row">
+        <!-- sección de los logos -->
+        <div class="col-3">
+          <img width="130px" height="80px" src="/assets/img/logo2.png" alt="logo">
+        </div>
+        <div class="col-3 offset-6">Logo Izquierda</div>
+        <hr/>
+        <!-- el buscador de productos -->
+        <div class="col-12">          
+          <div class="input-group pb-3">
+            <input type="text" class="form-control" placeholder="Search Product" aria-label="Search Product" aria-describedby="Search Product">
+              <span class="input-group-text" id="basic-addon1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                </svg>
+              </span>
+            </div>          
+        </div>
+        <hr/>
+        <!-- la lista de productos -->
+        <div class="col-12">
+          <div class="row">
+            <div class="col-3 pb-2" *ngFor="let product of products">
+              <div class="card text-center">
+                <img
+                  class="card-img-top"          
+                  width="70px"
+                  height="70px"
+                  [src]="product.imageURL"
+                  [alt]="product.name"          
+                />       
+                <div class="card-body ">
+                  <h5 class="card-title">
+                    <span>{{product.name}}</span>            
+                  </h5>
+                  <div class="card-text">
+                    <div class="form-group">
+
+                     <div class="input-group pb-3">
+                       <button class="input-group-text" (click)="decrementQuantity(product)">
+                         -
+                        </button>
+                      <input type="text" [(ngModel)]="product.selectedQuantity" class="form-control text-center" placeholder="0" aria-label="0" aria-describedby="0">
+                        <button class="input-group-text" (click)="incrementQuantity(product)">
+                         +
+                        </button>
+                      </div>   
+                      
+                    </div>
+                    <div class="form-group pt-2 pb-2">
+                      <span>${{product.price}}</span>            
+                    </div>
+                  </div>
+                  <div [class.disabled]="isProductInCart(product) || product.selectedQuantity < 1" >            
+                    <button (click)="addToCart(product)" [disabled]="isProductInCart(product) || product.selectedQuantity < 1" class="btn btn-primary col">Add to Cart</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-4 right-side">
+    <div class="col-12">
+      <div class="row">
+        <div class="col-12">Carrito</div>
+        <hr/>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-12">
+              <div class="row">
+                <div class="col-6">
+                  <span>Item</span>
+                </div>
+                <div class="col-3">
+                  <span>Quantity</span>
+                </div>
+                <div class="col-3">
+                  <span>Total</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-12" *ngFor="let item of cart">
+              <div class="row">
+                <div class="col-6">
+                  <span>{{item.name}}</span>
+                </div>
+                <div class="col-3">
+                  <span>{{item.selectedQuantity}}</span>
+                </div>
+                <div class="col-3">
+                  <span>${{(item.price * item.selectedQuantity).toFixed(2)}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

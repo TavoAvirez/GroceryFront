@@ -11,7 +11,7 @@ import * as common from '../../../utils/common-helper';
 @Component({
   selector: 'app-inventory-products',
   standalone: true,
-  imports: [...COMMON_IMPORTS, FormsModule],
+  imports: [...COMMON_IMPORTS],
   templateUrl: './products-inventory.component.html',
 })
 export class ProductsInventoryComponent implements OnInit {
