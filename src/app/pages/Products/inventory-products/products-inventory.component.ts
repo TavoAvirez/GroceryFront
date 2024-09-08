@@ -7,11 +7,12 @@ import { COMMON_IMPORTS } from '../../../app.config';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import * as common from '../../../utils/common-helper';
+import { LoadingComponent } from '../../loading/loading.component';
 
 @Component({
   selector: 'app-inventory-products',
   standalone: true,
-  imports: [...COMMON_IMPORTS],
+  imports: [...COMMON_IMPORTS, LoadingComponent],
   templateUrl: './products-inventory.component.html',
 })
 export class ProductsInventoryComponent implements OnInit {
@@ -19,6 +20,7 @@ export class ProductsInventoryComponent implements OnInit {
   products: Product[] = [];
   productForm!: FormGroup;
   previousProduct: Product | null = null;
+  showLoader = true;
   isEditing = false;
   @ViewChild('fileInput') fileInput!: ElementRef;
 
@@ -26,7 +28,6 @@ export class ProductsInventoryComponent implements OnInit {
   constructor(
     private productsService: ProductsService,
     private sanitizer: DomSanitizer,
-    private router: Router,
     private productService: ProductsService,
     private formBuilder: FormBuilder,
   ) {
@@ -56,19 +57,33 @@ export class ProductsInventoryComponent implements OnInit {
       .pipe(
         mergeMap((data: Product[]) => {
           const observables = data.map(product => {
-            return this.loadImage(product).pipe(
-              map(() => product)
+            return this.loadImage(product).pipe(              
+              map(() => {                
+                return product;
+              })
             );
           });
           return forkJoin(observables);
         })
       )
-      .subscribe((data: Product[]) => {
-        if (data) {
-          console.log(data);
-          this.products = data;
+      .subscribe(
+        {
+          next: (data: Product[]) => {
+            if (data) {
+              this.showLoader = false;
+              console.log('Product loaded', this.showLoader);
+              this.products = data;
+            }
+          },
+          error: (error) => {
+            alert('Error loading products');
+            console.error('Error loading products', error);
+          },
+          complete: () => {
+            console.log('Product loading completed');
+          }
         }
-      });
+    );
   }
 
   /**

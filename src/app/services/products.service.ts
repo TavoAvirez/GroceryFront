@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of, throwError } from 'rxjs';
 import { Product } from '../models/Product';
 
 @Injectable({
@@ -17,9 +17,18 @@ export class ProductsService {
     return this.http.get<Product[]>(this.apiUrl + this.url);
   }
 
-  getProduct(id: number): Observable<any> {    
+  getProduct(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl + this.url}/${id}`);
   }
+
+  getProductByQuery(query: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl + this.url}/search/?query=${query}`).pipe(
+      catchError(error => {
+        return of([]);
+      })
+    );
+  }
+
 
   createProduct(product: any): Observable<any> {
     return this.http.post<any>(this.apiUrl + this.url, product);
@@ -30,6 +39,6 @@ export class ProductsService {
   }
 
   deleteProduct(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl +  this.url}/${id}`);
+    return this.http.delete<any>(`${this.apiUrl + this.url}/${id}`);
   }
 }

@@ -2,36 +2,39 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductsService } from '../../../services/products.service';
 import { Product } from '../../../models/Product';
-import { forkJoin, map, mergeMap, Observable } from 'rxjs';
+import { catchError, forkJoin, map, mergeMap, Observable, of } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { COMMON_IMPORTS } from '../../../app.config';
+import { LoadingComponent } from '../../loading/loading.component';
 
 @Component({
   selector: 'app-pos',
   standalone: true,
   templateUrl: './pos.component.html',
   styleUrl: './pos.component.scss',
-  imports: [...COMMON_IMPORTS]
-  
+  imports: [...COMMON_IMPORTS, LoadingComponent]
+
 })
 export class PosComponent implements OnInit {
 
   products: Product[] = [];
   cart: Product[] = [];
-  
-  
+  showLoader = true;
+
   constructor(
     private productsService: ProductsService,
     private sanitizer: DomSanitizer,
   ) { }
 
   ngOnInit() {
+    console.log('oninit products');
     this.getProducts();
   }
 
   // create a function to get all products from the service and store them in the products array
   getProducts() {
+    this.showLoader = true;
     this.productsService.getProducts()
       .pipe(
         mergeMap((data: Product[]) => {
@@ -41,16 +44,28 @@ export class PosComponent implements OnInit {
                 return {
                   ...product,
                   selectedQuantity: 0
-                }
+                };
+              }),
+              catchError(error => {
+                console.error('Error loading image for product:', product, error);
+                // Maneja el error devolviendo el producto con la cantidad seleccionada en 0
+                return of({
+                  ...product,
+                  selectedQuantity: 0,
+                });
               })
             );
           });
           return forkJoin(observables);
+        }),
+        catchError(error => {
+          console.error('Error loading images for products:', error);
+          return of([]);
         })
       )
       .subscribe((data: Product[]) => {
         if (data) {
-          console.log(data);
+          this.showLoader = false;
           this.products = data;
         }
       });
@@ -93,7 +108,7 @@ export class PosComponent implements OnInit {
  * 
  * Función del Método:
  * - Incrementa la cantidad seleccionada del producto.
- */  
+ */
   incrementQuantity(product: Product) {
     product.selectedQuantity++;
   }
@@ -112,8 +127,14 @@ export class PosComponent implements OnInit {
       product.selectedQuantity--;
     }
     if (product.selectedQuantity === 0 && this.isProductInCart(product)) {
-      this.cart = this.cart.filter(cartItem => cartItem.id !== product.id);
+      this.removeFromCart(product.id);
     }
+  }
+
+  // create a function to remove a product from the cart
+  removeFromCart(productId: number) {
+    this.cart = this.cart.filter(cartItem => cartItem.id !== productId);
+    this.products.find(product => product.id === productId)!.selectedQuantity = 0;
   }
 
   // Método para verificar si el producto está en el carrito
@@ -121,5 +142,53 @@ export class PosComponent implements OnInit {
     return this.cart.some(cartItem => cartItem.id === product.id);
   }
 
+  //crea una funcion para buscar productos en la variable products
+  searchProducts(event: any) {
+    if (event.target.value === '') {
+      console.log('search value is empty');
+      this.getProducts();
+      return;
+    }
+    this.showLoader = true;
+    const searchValue = event.target.value.toLowerCase();
 
+    this.productsService.getProductByQuery(searchValue)
+      .pipe(
+        mergeMap((data: Product[]) => {
+          if( data.length === 0) {
+            this.showLoader = false;
+            return of([]);
+          }
+          const observables = data.map(product => {
+            return this.loadImage(product).pipe(
+              map(() => {
+                return {
+                  ...product,
+                  selectedQuantity: 0
+                };
+              })
+            );
+          });
+          return forkJoin(observables);
+        })
+      )
+      .subscribe(
+        {
+          next: (products) => {
+            console.log('next', products);
+            this.showLoader = false;
+            this.products = products;
+          },
+          error: (error) => {
+            alert('Error loading products');
+            console.error('Error loading products', error);
+          },
+          complete: () => {
+            this.showLoader = false;
+            console.log('complete')
+            console.log('Product loading completed');
+          }
+        }
+      );
+  }
 }
